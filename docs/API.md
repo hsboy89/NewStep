@@ -54,8 +54,15 @@ const response = await axios.get(proxyUrl)
 }
 ```
 
-**Rate Limits:**
-- 무료 티어: 일일 요청 제한 있음 (정확한 수치는 공식 문서 참조)
+**Rate Limits (무료 플랜):**
+- 일일 요청 횟수: 약 10,000건
+- 데이터 갱신 주기: 1시간 (60분)
+- 기사 개수: 최대 10개 (한 번에 최신 기사 10개까지만 가져올 수 있음)
+- 유지 기간: 무제한 (유료 결제 없이 계속 사용 가능)
+
+**주의사항:**
+- 사용자가 많아질 경우 API 호출 횟수가 급증할 수 있음
+- 로컬 스토리지 캐싱을 통해 API 호출 최소화 필요
 
 **Usage:**
 ```javascript
@@ -63,78 +70,76 @@ const response = await axios.get(proxyUrl)
 import axios from 'axios'
 
 const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`
-const response = await axios.get(proxyUrl)
+const response = await axios.get(proxyUrl, {
+  timeout: 10000 // 10초 타임아웃
+})
 
 if (response.data.status === 'ok' && response.data.items) {
   // items 배열 처리
+  console.log(`✅ RSS 피드 로드 성공: ${feedUrl} (${response.data.items.length}개 기사)`)
 }
 ```
 
+**캐싱 전략:**
+프로젝트에서는 로컬 스토리지를 활용하여 API 호출을 최소화합니다:
+- 캐시 유효 시간: 1시간 (rss2json 갱신 주기와 동일)
+- 자동 업데이트: 1시간마다만 체크
+- 수동 새로고침: 강제로 API 호출 (캐시 무시)
+- 예상 API 호출 감소율: 약 95% (432회/일 → 24회/일)
+
+자세한 내용은 [OPTIMIZATION.md](./OPTIMIZATION.md) 참고
+
 ---
 
-### 2. Free Dictionary API
+### 2. Glosbe Dictionary API
 
-영어 단어의 정의, 발음, 예문 등을 제공하는 무료 API입니다.
+영어 단어의 한글 뜻을 제공하는 다국어 사전 API입니다. 여러 개의 정의와 예문을 제공하여 학습에 유용합니다.
 
-**Base URL:** `https://api.dictionaryapi.dev/api/v2/entries/en`
+**Base URL:** `https://glosbe.com/gapi/translate`
 
 **Endpoint:**
 ```
-GET /api/v2/entries/en/{word}
+GET /gapi/translate?from=en&dest=ko&format=json&phrase={word}&pretty=true
 ```
 
 **Parameters:**
-- `word` (required): 조회할 영어 단어 (URL 경로에 포함)
+- `from` (required): 원본 언어 (`en`)
+- `dest` (required): 번역할 언어 (`ko`)
+- `format` (required): 응답 형식 (`json`)
+- `phrase` (required): 조회할 영어 단어
+- `pretty` (optional): JSON 포맷팅 (`true`)
 
-**Example Request:**
-```javascript
-const word = "discovery"
-const response = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-```
+**특징:**
+- API 키 불필요: 복잡한 승인 절차 없이 바로 사용 가능
+- 다중 정의: 단어의 여러 의미를 배열로 제공
+- 예문 포함: 실제 문장에서의 사용 예시 제공
+- 커뮤니티 기반: 전 세계 사용자가 기여한 오픈 사전 데이터
 
-**Response:**
-```json
-[
-  {
-    "word": "discovery",
-    "phonetic": "/dɪˈskʌvəri/",
-    "phonetics": [
-      {
-        "text": "/dɪˈskʌvəri/",
-        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/discovery-us.mp3"
-      }
-    ],
-    "meanings": [
-      {
-        "partOfSpeech": "noun",
-        "definitions": [
-          {
-            "definition": "The act of discovering.",
-            "synonyms": ["finding", "uncovering"],
-            "antonyms": [],
-            "example": "The discovery of new species is important for science."
-          }
-        ],
-        "synonyms": ["finding", "uncovering", "detection"],
-        "antonyms": []
-      }
-    ],
-    "license": {
-      "name": "CC BY-SA 3.0",
-      "url": "https://creativecommons.org/licenses/by-sa/3.0"
-    },
-    "sourceUrls": ["https://en.wiktionary.org/wiki/discovery"]
-  }
-]
-```
+**주의사항:**
+- CORS 정책으로 인해 브라우저에서 직접 호출 불가
+- Vercel Serverless Function을 통해 호출 필요
+- 커뮤니티 데이터 기반이라 가끔 검색 결과가 부족하거나 속도가 느릴 수 있음
 
-**Error Handling:**
-단어를 찾을 수 없는 경우 404 응답:
+**Response 예시:**
 ```json
 {
-  "title": "No Definitions Found",
-  "message": "Sorry pal, we couldn't find definitions for the word you were looking for.",
-  "resolution": "You can try the search again at later time or head to the web instead."
+  "tuc": [
+    {
+      "phrase": {
+        "text": "발견"
+      },
+      "meanings": [
+        {
+          "text": "발견하다"
+        }
+      ],
+      "examples": [
+        {
+          "text": "The discovery of new species is important."
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -143,16 +148,22 @@ const response = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/e
 // src/utils/dictionary.js
 import axios from 'axios'
 
-const DICTIONARY_API = 'https://api.dictionaryapi.dev/api/v2/entries/en'
+const DICTIONARY_API = '/api/dictionary' // Vercel Serverless Function
 
 export const fetchWordDefinition = async (word) => {
   try {
-    const response = await axios.get(`${DICTIONARY_API}/${word.toLowerCase()}`)
+    const response = await axios.get(
+      `${DICTIONARY_API}?word=${encodeURIComponent(word)}`
+    )
     
-    if (response.data && response.data.length > 0) {
-      const entry = response.data[0]
-      // 데이터 처리...
-      return processedData
+    if (response.data && response.data.meanings && response.data.meanings.length > 0) {
+      const firstMeaning = response.data.meanings[0]
+      return {
+        word: word,
+        meaning: firstMeaning.definition, // 첫 번째 한글 뜻
+        example: firstMeaning.examples?.[0]?.text || '', // 예문
+        allMeanings: response.data.meanings // 모든 정의
+      }
     }
     return null
   } catch (error) {
@@ -161,6 +172,17 @@ export const fetchWordDefinition = async (word) => {
   }
 }
 ```
+
+**장점:**
+- ✅ API 키 불필요 (설정 간편)
+- ✅ 여러 정의 제공 (학습에 유용)
+- ✅ 예문 포함 (실제 사용 예시)
+- ✅ 네이버 사전 스타일의 데이터 구조
+
+**단점:**
+- ⚠️ 응답 속도가 다소 느릴 수 있음
+- ⚠️ 일부 단어는 검색 결과가 부족할 수 있음
+- ⚠️ CORS 정책으로 인해 서버 사이드 호출 필요
 
 ---
 

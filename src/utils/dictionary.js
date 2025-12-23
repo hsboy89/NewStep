@@ -27,7 +27,8 @@ const cleanWord = (word) => {
 }
 
 /**
- * 단어의 뜻을 사전 API에서 가져오기 (여러 시도)
+ * Free Dictionary API에서 단어 뜻 가져오기
+ * 복수형/과거형/진행형 등 여러 형태를 시도
  */
 export const fetchWordDefinition = async (word) => {
   if (!word) return null
@@ -46,15 +47,12 @@ export const fetchWordDefinition = async (word) => {
   ]
   
   // 중복 제거
-  const uniqueVariations = [...new Set(wordVariations)]
+  const uniqueVariations = [...new Set(wordVariations)].filter(v => v && v.length > 1)
   
-  // 각 변형을 시도
   for (const variation of uniqueVariations) {
-    if (!variation || variation.length < 2) continue
-    
     try {
       const response = await axios.get(`${DICTIONARY_API}/${encodeURIComponent(variation)}`, {
-        timeout: 5000
+        timeout: 7000
       })
       
       if (response.data && response.data.length > 0) {
@@ -78,8 +76,10 @@ export const fetchWordDefinition = async (word) => {
         continue
       }
       // 다른 에러는 로그만 남기고 계속
-      if (error.response?.status !== 404) {
-        console.warn(`Dictionary API error for "${variation}":`, error.response?.status)
+      if (error.response) {
+        console.warn(`Free Dictionary API 오류 (${variation}):`, error.response.status)
+      } else {
+        console.warn('Free Dictionary API 요청 중 오류:', error.message)
       }
     }
   }

@@ -4,6 +4,7 @@ import { ArrowLeft, Volume2, VolumeX } from 'lucide-react'
 import { useNewsStore } from '../store/newsStore'
 import { speakText, stopSpeaking } from '../utils/textToSpeech'
 import WordTooltip from '../components/WordTooltip'
+import { translateArticle } from '../utils/articleTranslate'
 
 const Reader = () => {
   const { id } = useParams()
@@ -12,6 +13,10 @@ const Reader = () => {
   const [selectedWord, setSelectedWord] = useState(null)
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
   const [isPlaying, setIsPlaying] = useState(false)
+  const [showTranslation, setShowTranslation] = useState(false)
+  const [translationLoading, setTranslationLoading] = useState(false)
+  const [translationError, setTranslationError] = useState('')
+  const [translationText, setTranslationText] = useState('')
   const contentRef = useRef(null)
 
   const article = articles.find(a => a.id === decodeURIComponent(id))
@@ -35,6 +40,32 @@ const Reader = () => {
       y: rect.top
     })
     setSelectedWord(cleanWord)
+  }
+
+  const handleToggleTranslation = async () => {
+    // 이미 번역된 텍스트가 있고, 다시 누르면 토글만
+    if (translationText) {
+      setShowTranslation((prev) => !prev)
+      return
+    }
+
+    if (!contentRef.current) return
+
+    try {
+      setTranslationLoading(true)
+      setTranslationError('')
+
+      const text = contentRef.current.innerText
+      const translated = await translateArticle(text)
+
+      setTranslationText(translated)
+      setShowTranslation(true)
+    } catch (error) {
+      console.error('기사 번역 실패:', error)
+      setTranslationError('번역을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setTranslationLoading(false)
+    }
   }
 
   const handlePlayText = () => {
@@ -163,6 +194,34 @@ const Reader = () => {
               {renderContent(article.content)}
             </p>
           </div>
+        </div>
+
+        {/* 번역 보기 버튼 및 번역 결과 */}
+        <div className="mt-4 flex flex-col items-stretch">
+          <button
+            onClick={handleToggleTranslation}
+            disabled={translationLoading}
+            className="self-end px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {translationLoading
+              ? '번역 불러오는 중...'
+              : showTranslation
+                ? '번역 접기'
+                : '번역 보기'}
+          </button>
+
+          {translationError && (
+            <p className="mt-2 text-sm text-red-500">{translationError}</p>
+          )}
+
+          {showTranslation && translationText && (
+            <div className="mt-4 pt-4 border-t">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">번역본</h3>
+              <p className="text-base text-gray-800 leading-relaxed whitespace-pre-wrap">
+                {translationText}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 키워드 */}

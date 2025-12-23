@@ -83,13 +83,7 @@ const WordTooltip = ({ word, position, onClose }) => {
         <div className="flex-1">
           <div className="flex items-center space-x-2">
             <h4 className="text-lg font-bold text-gray-900">{word}</h4>
-            {definition?.phonetic && (
-              <span className="text-sm text-gray-500">[{definition.phonetic}]</span>
-            )}
           </div>
-          {definition?.partOfSpeech && (
-            <span className="text-xs text-blue-600 italic">{definition.partOfSpeech}</span>
-          )}
         </div>
         <button
           onClick={onClose}
@@ -103,14 +97,17 @@ const WordTooltip = ({ word, position, onClose }) => {
         <div className="text-sm text-gray-500">로딩 중...</div>
       ) : definition ? (
         <>
-          <p className="text-sm text-gray-700 mb-3">{definition.meaning}</p>
-          
-          {definition.example && (
-            <div className="bg-gray-50 rounded p-2 mb-3">
-              <p className="text-xs text-gray-600 italic">예문:</p>
-              <p className="text-sm text-gray-800">{definition.example}</p>
-            </div>
-          )}
+          <div className="mb-3">
+            <p className="text-base font-medium text-gray-900 mb-1">의미:</p>
+            <p className="text-sm text-gray-700 mb-2">{definition.meaning}</p>
+
+            {definition.example && (
+              <div className="bg-gray-50 rounded p-2 mt-2">
+                <p className="text-xs text-gray-600 italic mb-1">예문:</p>
+                <p className="text-sm text-gray-800">{definition.example}</p>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center space-x-2 pt-2 border-t">
             <button
@@ -144,7 +141,7 @@ const WordTooltip = ({ word, position, onClose }) => {
           </div>
         </>
       ) : (
-        <div className="text-sm text-gray-500">정의를 찾을 수 없습니다.</div>
+        <div className="text-sm text-gray-500">의미를 찾을 수 없습니다.</div>
       )}
     </div>
   )

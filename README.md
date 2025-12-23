@@ -20,7 +20,7 @@
 - **Icons**: Lucide React
 - **API**: 
   - rss2json (RSS 파싱)
-  - Free Dictionary API (단어 정의)
+  - Glosbe Dictionary API (단어 사전)
   - Web Speech API (TTS)
 
 ## 설치 및 실행
