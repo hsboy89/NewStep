@@ -125,14 +125,14 @@ const Home = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">최신 뉴스</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">최신 뉴스</h1>
             {lastCheckedTime && (
               <div className="space-y-1">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-300">
                   마지막 업데이트: {new Date(lastCheckedTime).toLocaleString('ko-KR')}
                 </p>
                 {isCacheValid() && (
-                  <p className="text-xs text-green-600">
+                  <p className="text-xs text-green-400">
                     📦 캐시된 데이터 사용 중 (다음 업데이트: {new Date(new Date(lastCheckedTime).getTime() + 60 * 60 * 1000).toLocaleString('ko-KR')})
                   </p>
                 )}
@@ -151,7 +151,7 @@ const Home = () => {
 
         {/* 레벨 필터 */}
         <div className="flex items-center space-x-2 mb-4">
-          <span className="text-sm font-medium text-gray-700">난이도:</span>
+          <span className="text-sm font-medium text-gray-200">난이도:</span>
           {['all', '1', '2', '3'].map(level => (
             <button
               key={level}
@@ -165,7 +165,7 @@ const Home = () => {
                     : level === '2'
                     ? 'bg-yellow-600 text-white'
                     : 'bg-red-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-800 text-gray-200 hover:bg-gray-700'
               }`}
             >
               {level === 'all' ? '전체' : `Level ${level}`}
@@ -175,7 +175,7 @@ const Home = () => {
 
         {/* 카테고리 필터 */}
         <div className="flex items-center space-x-2 flex-wrap gap-2">
-          <Filter className="w-4 h-4 text-gray-500" />
+          <Filter className="w-4 h-4 text-gray-300" />
           {categories.map(category => (
             <button
               key={category}
@@ -183,7 +183,7 @@ const Home = () => {
               className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === category
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-800 text-gray-200 hover:bg-gray-700'
               }`}
             >
               {categoryLabels[category]}
@@ -203,15 +203,15 @@ const Home = () => {
       {loading && articles.length === 0 ? (
         <div className="text-center py-12">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">뉴스를 불러오는 중...</p>
+          <p className="text-gray-300">뉴스를 불러오는 중...</p>
         </div>
       ) : filteredArticles.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-600">표시할 기사가 없습니다.</p>
+          <p className="text-gray-300">표시할 기사가 없습니다.</p>
         </div>
       ) : (
         <>
-          <div className="mb-4 text-sm text-gray-600">
+          <div className="mb-4 text-sm text-gray-300">
             총 {filteredArticles.length}개의 기사
           </div>
           <div className="space-y-4">

@@ -117,7 +117,7 @@ const Reader = () => {
   if (!article) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600 mb-4">기사를 찾을 수 없습니다.</p>
+        <p className="text-white mb-4">기사를 찾을 수 없습니다.</p>
         <button
           onClick={() => navigate('/')}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -133,7 +133,7 @@ const Reader = () => {
       {/* 뒤로가기 버튼 */}
       <button
         onClick={() => navigate('/')}
-        className="flex items-center space-x-2 mb-6 text-gray-600 hover:text-gray-900 transition-colors"
+        className="flex items-center space-x-2 mb-6 text-white hover:text-gray-200 transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>목록으로</span>

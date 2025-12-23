@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { BookOpen, Home, Volume2 } from 'lucide-react'
+import Aurora from './Aurora'
 
 const Layout = ({ children }) => {
   const location = useLocation()
@@ -7,7 +8,16 @@ const Layout = ({ children }) => {
   const isActive = (path) => location.pathname === path
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
+    <div className="min-h-screen bg-gray-950 relative overflow-hidden">
+      {/* 배경 Aurora 효과 */}
+      <div className="fixed inset-0 -z-10">
+        <Aurora
+          colorStops={['#3A29FF', '#FF94B4', '#FF3232']}
+          blend={0.5}
+          amplitude={1.0}
+          speed={0.5}
+        />
+      </div>
       {/* 헤더 */}
       <header className="bg-white shadow-sm border-b relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
