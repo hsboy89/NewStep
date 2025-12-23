@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-950 relative overflow-hidden">
       {/* 배경 Aurora 효과 */}
-      <div className="fixed inset-0 -z-10">
+      <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <Aurora
           colorStops={['#3A29FF', '#FF94B4', '#FF3232']}
           blend={0.5}
@@ -19,7 +19,7 @@ const Layout = ({ children }) => {
         />
       </div>
       {/* 헤더 */}
-      <header className="bg-white shadow-sm border-b relative z-10">
+      <header className="bg-white shadow-sm border-b relative" style={{ zIndex: 10 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center space-x-2">
@@ -56,12 +56,12 @@ const Layout = ({ children }) => {
       </header>
 
       {/* 메인 컨텐츠 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative" style={{ zIndex: 10 }}>
         {children}
       </main>
 
       {/* 푸터 */}
-      <footer className="bg-white border-t mt-16 relative z-10">
+      <footer className="bg-white border-t mt-16 relative" style={{ zIndex: 10 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-sm text-gray-500">
             © 2025 NewStep - 영어 뉴스 학습 플랫폼

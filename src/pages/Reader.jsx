@@ -93,24 +93,58 @@ const Reader = () => {
   const renderContent = (content) => {
     if (!content) return null
 
-    const words = content.split(/(\s+|[.,!?;:"'()[\]{}])/g)
-    
-    return words.map((word, index) => {
-      const isPunctuation = /^[.,!?;:"'()[\]{}\s]+$/.test(word)
-      
-      if (isPunctuation) {
-        return <span key={index}>{word}</span>
+    // 날짜/시간 패턴을 먼저 처리 (예: "23-12-2025 15:00", "2025-12-23", "23/12/2025")
+    const dateTimePattern = /\d{1,2}[-/]\d{1,2}[-/]\d{2,4}(\s+\d{1,2}:\d{2})?/g
+    const parts = []
+    let lastIndex = 0
+    let match
+
+    // 날짜/시간 패턴 찾기
+    while ((match = dateTimePattern.exec(content)) !== null) {
+      // 패턴 이전의 텍스트 추가
+      if (match.index > lastIndex) {
+        parts.push({ text: content.substring(lastIndex, match.index), isDateTime: false })
+      }
+      // 날짜/시간 패턴 추가 (클릭 불가능)
+      parts.push({ text: match[0], isDateTime: true })
+      lastIndex = match.index + match[0].length
+    }
+    // 나머지 텍스트 추가
+    if (lastIndex < content.length) {
+      parts.push({ text: content.substring(lastIndex), isDateTime: false })
+    }
+
+    // parts가 비어있으면 원본 텍스트 사용
+    if (parts.length === 0) {
+      parts.push({ text: content, isDateTime: false })
+    }
+
+    return parts.map((part, partIndex) => {
+      if (part.isDateTime) {
+        // 날짜/시간은 클릭 불가능하게 표시
+        return <span key={`datetime-${partIndex}`}>{part.text}</span>
       }
 
-      return (
-        <span
-          key={index}
-          onClick={(e) => handleWordClick(word, e)}
-          className="hover:bg-yellow-200 hover:cursor-pointer transition-colors rounded px-0.5"
-        >
-          {word}
-        </span>
-      )
+      // 일반 텍스트는 단어 단위로 분리
+      const words = part.text.split(/(\s+|[.,!?;:"'()[\]{}])/g)
+      
+      return words.map((word, wordIndex) => {
+        const isPunctuation = /^[.,!?;:"'()[\]{}\s]+$/.test(word)
+        
+        if (isPunctuation) {
+          return <span key={`${partIndex}-${wordIndex}`}>{word}</span>
+        }
+
+        return (
+          <span
+            key={`${partIndex}-${wordIndex}`}
+            onClick={(e) => handleWordClick(word, e)}
+            className="hover:bg-yellow-200 hover:cursor-pointer transition-colors rounded px-0.5"
+          >
+            {word}
+          </span>
+        )
+      })
     })
   }
 
