@@ -33,6 +33,15 @@ export const useNewsStore = create(
           const categoryMatch = selectedCategory === 'all' || article.category === selectedCategory
           return levelMatch && categoryMatch
         })
+      },
+
+      // 캐시 유효 시간 체크 (1시간 = 3600000ms)
+      isCacheValid: () => {
+        const lastChecked = get().lastCheckedTime
+        if (!lastChecked) return false
+        const cacheAge = Date.now() - new Date(lastChecked).getTime()
+        const oneHour = 60 * 60 * 1000 // 1시간
+        return cacheAge < oneHour
       }
     }),
     {
